@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"strings"
 )
 
 // Canvas is 2D array x = 0, y = 0 is top left
@@ -33,13 +34,6 @@ func (cv Canvas) Bounds() Rect {
 	}
 }
 
-func (cv Canvas) Center() Point {
-	return Point{
-		X: (float64(cv.Width()) - 1) / 2,
-		Y: (float64(cv.Height()) - 1) / 2,
-	}
-}
-
 type Drawer interface {
 	Draw(Canvas, byte)
 }
@@ -63,17 +57,23 @@ func (cv Canvas) WriteTo(w io.Writer) error {
 	return ww.Flush()
 }
 
+var Z Point
+
 type Point struct{ X, Y float64 }
 
 func (p Point) Bounds() Rect {
 	return Rect{p, p}
 }
 
-func (p Point) Add(other Point) Point {
+func (p Point) AddXY(x, y float64) Point {
 	return Point{
-		X: p.X + other.X,
-		Y: p.Y + other.Y,
+		X: p.X + x,
+		Y: p.Y + y,
 	}
+}
+
+func (p Point) Add(other Point) Point {
+	return p.AddXY(other.X, other.Y)
 }
 
 func (p Point) Sub(other Point) Point {
@@ -229,23 +229,57 @@ type Text struct {
 	Text   string
 }
 
+func (t Text) Lines() []string {
+	return strings.Split(t.Text, "\n")
+}
+
+func (Text) lineDims(lines []string) (width, height int) {
+	for _, line := range lines {
+		if l := len(line); l > width {
+			width = l
+		}
+		height++
+	}
+	return width, height
+}
+
+func (t Text) Dims() (width, height int) {
+	return t.lineDims(t.Lines())
+}
+
 func (t Text) Bounds() Rect {
-	width := float64(len([]byte(t.Text)))
+	w, h := t.Dims()
 	return Rect{
 		Min: t.Origin,
-		Max: t.Origin.Add(Point{width - 1, 0}),
+		Max: t.Origin.Add(Point{
+			X: float64(w) - 1,
+			Y: float64(h) - 1,
+		}),
 	}
 }
 
 func (t Text) Draw(cv Canvas, _ byte) {
-	x, y := t.Origin.Round()
-	for i, b := range []byte(t.Text) {
-		cv.SetAt(x+i, y, b)
+	xOrigin, yOrigin := t.Origin.Round()
+	for y, line := range t.Lines() {
+		for x, b := range []byte(line) {
+			cv.SetAt(xOrigin+x, yOrigin+y, b)
+		}
 	}
 }
 
 type Rect struct {
 	Min, Max Point
+}
+
+func (r Rect) Contains(b Bounder) bool {
+	bounds := b.Bounds()
+	min := r.Min.Max(bounds.Max)
+	max := r.Min.Min(bounds.Max)
+	return r.Min.X <= min.X && r.Min.Y <= min.Y && r.Max.X >= max.X && r.Max.Y >= max.X
+}
+
+func (r Rect) Center() Point {
+	return r.Min.Between(r.Max, 0.5)
 }
 
 func (r Rect) String() string {
@@ -256,11 +290,19 @@ func (r Rect) Bounds() Rect {
 	return r
 }
 
-func (r Rect) Pad(n float64) Rect {
-	padding := Point{n, n}
+func (r Rect) Grow(n float64) Rect {
+	amount := Point{n, n}
 	return Rect{
-		Min: r.Min.Sub(padding),
-		Max: r.Max.Add(padding),
+		Min: r.Min.Sub(amount),
+		Max: r.Max.Add(amount),
+	}
+}
+
+func (r Rect) Shrink(n float64) Rect {
+	amount := Point{n, n}
+	return Rect{
+		Min: r.Min.Add(amount),
+		Max: r.Max.Sub(amount),
 	}
 }
 
@@ -285,7 +327,7 @@ type Bounder interface {
 }
 
 func BoxAround(b Bounder) Box {
-	return b.Bounds().Pad(1).Box()
+	return b.Bounds().Grow(1).Box()
 }
 
 func (r Rect) Box() Box {

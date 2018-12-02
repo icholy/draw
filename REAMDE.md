@@ -1,3 +1,8 @@
+# Basic 2d drawing primitives for the terminal
+
+[![GoDoc](https://godoc.org/github.com/icholy/draw?status.svg)](https://godoc.org/github.com/icholy/draw)
+
+``` go
 package main
 
 import (
@@ -53,3 +58,4 @@ func main() {
 	}
 	fmt.Println()
 }
+```
