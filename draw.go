@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-// Canvas is 2D array x = 0, y = 0 is top left
+// Canvas is a 2D array x = 0, y = 0 is top left
 type Canvas [][]byte
 
 func NewCanvas(width, height int) Canvas {
