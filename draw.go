@@ -285,3 +285,20 @@ type Bounder interface {
 }
 
 func BoxAround(b Bounder) Box {
+	return b.Bounds().Pad(1).Box()
+}
+
+func (r Rect) Box() Box {
+	return Box{r}
+}
+
+type Box struct {
+	Rect
+}
+
+func (b Box) Draw(cv Canvas, _ byte) {
+	cv.Draw(b.Top(), '-')
+	cv.Draw(b.Bottom(), '-')
+	cv.Draw(b.Left(), '|')
+	cv.Draw(b.Right(), '|')
+}
