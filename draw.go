@@ -140,6 +140,10 @@ func (l Line) Bounds() Rect {
 	}
 }
 
+func (l Line) Mid() Point {
+	return l.A.Between(l.B, 0.5)
+}
+
 type Orientation int
 
 const (
@@ -204,52 +208,19 @@ func (c Circle) Circumference() float64 {
 	return 2 * math.Pi * c.Radius
 }
 
-func (c Circle) Point(factor float64) Point {
-	phase := (2 * math.Pi * factor) - math.Pi
+func (c Circle) Point(t float64) Point {
 	return Point{
-		X: c.Center.X + math.Sin(phase)*(c.Radius*2),
-		Y: c.Center.Y + math.Cos(phase)*c.Radius,
+		X: c.Center.X + math.Sin(t)*(c.Radius*2),
+		Y: c.Center.Y + math.Cos(t)*c.Radius,
 	}
 }
 
 func (c Circle) Draw(cv Canvas, b byte) {
-	var factor float64
+	t := -math.Pi
 	step := 1 / c.Circumference()
-	for factor < 1 {
-		cv.Draw(c.Point(factor), b)
-		factor += step
-	}
-}
-
-type Spiral struct {
-	Center Point
-	Radius float64
-	DeltaR float64
-}
-
-func (s Spiral) Bounds() Rect {
-	p := Point{s.Radius, s.Radius}
-	return Rect{
-		Min: s.Center.Sub(p),
-		Max: s.Center.Add(p),
-	}
-}
-
-func (s Spiral) Draw(cv Canvas, b byte) {
-	var factor float64
-	radius := s.Radius
-	deltaR := s.DeltaR
-	if deltaR <= 0 {
-		deltaR = 1
-	}
-	for radius > 0 {
-		c := Circle{Center: s.Center, Radius: radius}
-		cv.Draw(c.Point(factor), b)
-		factor += 1 / c.Circumference()
-		if factor > 1 {
-			factor = 0
-		}
-		radius -= deltaR
+	for t <= math.Pi {
+		cv.Draw(c.Point(t), b)
+		t += step
 	}
 }
 
