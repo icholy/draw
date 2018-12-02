@@ -280,17 +280,8 @@ func (r Rect) Draw(cv Canvas, b byte) {
 	cv.Draw(r.Right(), b)
 }
 
-func (r Rect) Border() Border {
-	return Border{r}
+type Bounder interface {
+	Bounds() Rect
 }
 
-type Border struct {
-	Rect
-}
-
-func (b Border) Draw(cv Canvas, _ byte) {
-	cv.Draw(b.Top(), '-')
-	cv.Draw(b.Bottom(), '-')
-	cv.Draw(b.Left(), '|')
-	cv.Draw(b.Right(), '|')
-}
+func BoxAround(b Bounder) Box {
