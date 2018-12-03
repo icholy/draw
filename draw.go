@@ -3,6 +3,7 @@ package draw
 import (
 	"bufio"
 	"fmt"
+	"image"
 	"io"
 	"math"
 	"strings"
@@ -60,6 +61,13 @@ func (cv Canvas) WriteTo(w io.Writer) error {
 var Z Point
 
 type Point struct{ X, Y float64 }
+
+func FromImagePoint(p image.Point) Point {
+	return Point{
+		X: float64(p.X),
+		Y: float64(p.Y),
+	}
+}
 
 func (p Point) Bounds() Rect {
 	return Rect{p, p}
@@ -269,6 +277,13 @@ func (t Text) Draw(cv Canvas, _ byte) {
 
 type Rect struct {
 	Min, Max Point
+}
+
+func FromImageRect(r image.Rectangle) Rect {
+	return Rect{
+		Min: FromImagePoint(r.Min),
+		Max: FromImagePoint(r.Max),
+	}
 }
 
 func (r Rect) Contains(b Bounder) bool {
