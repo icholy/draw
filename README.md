@@ -2,6 +2,9 @@
 
 [![GoDoc](https://godoc.org/github.com/icholy/draw?status.svg)](https://godoc.org/github.com/icholy/draw)
 
+> I found myself writing subsets of this code over and over for quick experiments.
+> So I figured I'd put it in a package.
+
 ``` go
 package main
 
