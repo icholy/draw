@@ -69,6 +69,10 @@ func FromImagePoint(p image.Point) Point {
 	}
 }
 
+func (p Point) Image() image.Point {
+	return image.Pt(p.Round())
+}
+
 func (p Point) Bounds() Rect {
 	return Rect{p, p}
 }
@@ -283,6 +287,13 @@ func FromImageRect(r image.Rectangle) Rect {
 	return Rect{
 		Min: FromImagePoint(r.Min),
 		Max: FromImagePoint(r.Max),
+	}
+}
+
+func (r Rect) Image() image.Rectangle {
+	return image.Rectangle{
+		Min: r.Min.Image(),
+		Max: r.Max.Image(),
 	}
 }
 
