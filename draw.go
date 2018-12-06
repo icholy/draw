@@ -359,3 +359,17 @@ func (b Box) Draw(cv Canvas, _ byte) {
 	cv.Draw(b.Left(), '|')
 	cv.Draw(b.Right(), '|')
 }
+
+type Fill struct {
+	Rect
+}
+
+func (r Rect) Fill() Fill { return Fill{r} }
+
+func (f Fill) Draw(cv Canvas, b byte) {
+	for x := f.Min.X; x <= f.Max.X; x++ {
+		for y := f.Min.Y; y <= f.Max.Y; y++ {
+			Point{x, y}.Draw(cv, b)
+		}
+	}
+}
