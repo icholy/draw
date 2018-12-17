@@ -25,6 +25,10 @@ func (cv Canvas) SetAt(x, y int, b byte) { cv[x][y] = b }
 func (cv Canvas) Width() int             { return len(cv) }
 func (cv Canvas) Height() int            { return len(cv[0]) }
 
+func (cv Canvas) Contains(x, y int) bool {
+	return x >= 0 && x < cv.Width() && y >= 0 && y < cv.Height()
+}
+
 func (cv Canvas) Bounds() Rect {
 	return Rect{
 		Min: Point{0, 0},
