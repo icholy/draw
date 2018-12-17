@@ -58,6 +58,18 @@ func (cv Canvas) WriteTo(w io.Writer) error {
 	return ww.Flush()
 }
 
+func (cv Canvas) ReadFrom(r io.Reader) error {
+	sc := bufio.NewScanner(r)
+	var y int
+	for sc.Scan() {
+		for x, b := range sc.Bytes() {
+			cv.SetAt(x, y, b)
+		}
+		y++
+	}
+	return sc.Err()
+}
+
 var Z Point
 
 type Point struct{ X, Y float64 }
